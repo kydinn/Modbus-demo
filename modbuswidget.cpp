@@ -414,3 +414,13 @@ void ModbusWidget::updateToggleButton(bool connected)
             ? QStringLiteral("QPushButton { background-color: #e74c3c; color: white; }")
             : QString());
 }
+
+void ModbusWidget::writeRegister(int address, int value)
+{
+    if (!m_portOpen) return;
+    QMetaObject::invokeMethod(m_worker, "writeRegister", Qt::QueuedConnection,
+                              Q_ARG(int, 100 + address),
+                              Q_ARG(int, m_slaveAddrSpin->value()),
+                              Q_ARG(int, address),
+                              Q_ARG(int, value));
+}

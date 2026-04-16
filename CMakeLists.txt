@@ -26,6 +26,10 @@ set(PROJECT_SOURCES
         modbusworker.cpp
         modbuswidget.h
         modbuswidget.cpp
+        alarmdisplaywidget.h
+        alarmdisplaywidget.cpp
+        alarmconfigwidget.h
+        alarmconfigwidget.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

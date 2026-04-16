@@ -23,6 +23,8 @@ public:
     ~ModbusWidget();
 
     ModbusCommand *command() const;
+    bool isPortOpen() const { return m_portOpen; }
+    void writeRegister(int address, int value);
 
 private slots:
     void scanPorts();

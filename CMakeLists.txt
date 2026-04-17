@@ -30,6 +30,8 @@ set(PROJECT_SOURCES
         alarmdisplaywidget.cpp
         alarmconfigwidget.h
         alarmconfigwidget.cpp
+        dragreorderlayout.h
+        dragreorderlayout.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

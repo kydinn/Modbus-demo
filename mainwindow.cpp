@@ -4,6 +4,8 @@
 #include "alarmdisplaywidget.h"
 #include "alarmconfigwidget.h"
 
+#include "dragreorderlayout.h"
+
 #include <QVBoxLayout>
 #include <QMessageBox>
 
@@ -14,15 +16,18 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setWindowTitle(QStringLiteral("Modbus RTU 上位机"));
 
-    auto *layout = new QVBoxLayout(ui->centralwidget);
-    m_modbusWidget = new ModbusWidget(ui->centralwidget);
-    layout->addWidget(m_modbusWidget);
+    auto *outerLayout = new QVBoxLayout(ui->centralwidget);
+    auto *dragContainer = new DragReorderLayout(ui->centralwidget);
+    outerLayout->addWidget(dragContainer);
 
-    auto *alarmWidget = new AlarmDisplayWidget(ui->centralwidget);
-    layout->addWidget(alarmWidget);
+    m_modbusWidget = new ModbusWidget(dragContainer);
+    dragContainer->addWidget(m_modbusWidget);
 
-    auto *alarmConfig = new AlarmConfigWidget(ui->centralwidget);
-    layout->addWidget(alarmConfig);
+    auto *alarmWidget = new AlarmDisplayWidget(dragContainer);
+    dragContainer->addWidget(alarmWidget);
+
+    auto *alarmConfig = new AlarmConfigWidget(dragContainer);
+    dragContainer->addWidget(alarmConfig);
 
     connect(alarmConfig, &AlarmConfigWidget::writeRequested,
             this, [this](int value1, int value2) {

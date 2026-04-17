@@ -2,10 +2,12 @@
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QGridLayout>
 #include <QLabel>
 #include <QSpinBox>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QSizePolicy>
 
 AlarmConfigWidget::AlarmConfigWidget(QWidget *parent)
     : QGroupBox(QStringLiteral("报警配置"), parent)
@@ -51,32 +53,34 @@ void AlarmConfigWidget::setupUi()
     topLayout->addStretch();
     mainLayout->addLayout(topLayout);
 
-    // --- Header: 通道屏蔽 1 2 3 ... 9 ---
-    auto *headerLayout = new QHBoxLayout;
-    headerLayout->addWidget(new QLabel(QStringLiteral("通道屏蔽")));
+    // --- Grid: header + checkbox rows ---
+    auto *grid = new QGridLayout;
+    grid->setHorizontalSpacing(4);
+    grid->setVerticalSpacing(4);
+
+    // Header row
+    auto *headerLabel = new QLabel(QStringLiteral("通道屏蔽"));
+    grid->addWidget(headerLabel, 0, 0);
     for (int i = 1; i <= 9; ++i) {
         auto *lbl = new QLabel(QString::number(i));
         lbl->setAlignment(Qt::AlignCenter);
-        lbl->setFixedWidth(22);
-        headerLayout->addWidget(lbl);
+        grid->addWidget(lbl, 0, i, Qt::AlignCenter);
     }
-    headerLayout->addStretch();
-    mainLayout->addLayout(headerLayout);
 
-    // Helper: add a row of checkboxes
+    // Helper: add a row of checkboxes into the grid
+    int gridRow = 1;
+    QVector<QLabel *> col0Labels;
+    col0Labels.append(headerLabel);
     auto addCheckRow = [&](const QString &title, int count, QVector<QCheckBox *> &boxes) {
-        auto *rowLayout = new QHBoxLayout;
         auto *label = new QLabel(title);
-        label->setMinimumWidth(60);
-        rowLayout->addWidget(label);
+        col0Labels.append(label);
+        grid->addWidget(label, gridRow, 0);
         for (int i = 0; i < count; ++i) {
             auto *cb = new QCheckBox;
-            cb->setFixedWidth(22);
             boxes.append(cb);
-            rowLayout->addWidget(cb);
+            grid->addWidget(cb, gridRow, i + 1, Qt::AlignCenter);
         }
-        rowLayout->addStretch();
-        mainLayout->addLayout(rowLayout);
+        ++gridRow;
     };
 
     // Row 1 groups: 热继(9) + PTC检测(4) + 不平衡(3)
@@ -86,6 +90,27 @@ void AlarmConfigWidget::setupUi()
 
     // Row 2 groups: 过流(9)
     addCheckRow(QStringLiteral("过　流:"), 9, m_row2Boxes);
+
+    // Justify all column-0 labels to the same width using letter spacing
+    {
+        int maxWidth = 0;
+        for (auto *lbl : col0Labels) {
+            int w = lbl->fontMetrics().horizontalAdvance(lbl->text());
+            maxWidth = qMax(maxWidth, w);
+        }
+        for (auto *lbl : col0Labels) {
+            const QString text = lbl->text();
+            int naturalWidth = lbl->fontMetrics().horizontalAdvance(text);
+            if (text.length() > 1 && naturalWidth < maxWidth) {
+                qreal spacing = qreal(maxWidth - naturalWidth) / (text.length() - 1);
+                QFont font = lbl->font();
+                font.setLetterSpacing(QFont::AbsoluteSpacing, spacing);
+                lbl->setFont(font);
+            }
+        }
+    }
+
+    mainLayout->addLayout(grid);
 
     // --- Write button ---
     m_writeBtn = new QPushButton(QStringLiteral("写入屏蔽配置"));
